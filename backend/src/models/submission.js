@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 const submissionSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'user',
     required: true
   },
   problemId: {
     type: Schema.Types.ObjectId,
-    ref: 'Problem',
+    ref: 'problem',
     required: true
   },
   code: {
@@ -19,7 +19,7 @@ const submissionSchema = new Schema({
   language: {
     type: String,
     required: true,
-    enum: ['javascript', 'cpp', 'java'] 
+    enum: ['javascript', 'c++', 'java'] 
   },
   status: {
     type: String,
@@ -27,11 +27,11 @@ const submissionSchema = new Schema({
     default: 'pending'
   },
   runtime: {
-    type: Number,  // milliseconds
+    type: Number,  
     default: 0
   },
   memory: {
-    type: Number,  // kB
+    type: Number,  
     default: 0
   },
   errorMessage: {
@@ -42,10 +42,15 @@ const submissionSchema = new Schema({
     type: Number,
     default: 0
   },
-  testCasesTotal: {  // Recommended addition
+  testCasesTotal: {  
     type: Number,
     default: 0
   }
 }, { 
   timestamps: true
 });
+
+
+const Submission = mongoose.model('submission',submissionSchema);
+
+module.exports = Submission;
