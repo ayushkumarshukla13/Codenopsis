@@ -3,12 +3,13 @@ const User =  require("../models/user")
 const validate = require('../utils/validator');
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const Submission = require("../models/submission")
 
 
 const register = async (req,res)=>{
     
     try{
-      
+     
       validate(req.body); 
       const {firstName, emailId, password}  = req.body;
 
@@ -63,7 +64,7 @@ const logout = async(req,res)=>{
 
         await redisClient.set(`token:${token}`,'Blocked');
         await redisClient.expireAt(`token:${token}`,payload.exp);
-   
+    
 
     res.cookie("token",null,{expires: new Date(Date.now())});
     res.send("Logged Out Succesfully");
@@ -77,12 +78,12 @@ const logout = async(req,res)=>{
 
 const adminRegister = async(req,res)=>{
     try{
-      
+       
       validate(req.body); 
       const {firstName, emailId, password}  = req.body;
 
       req.body.password = await bcrypt.hash(password, 10);
-  
+    
     
      const user =  await User.create(req.body);
      const token =  jwt.sign({_id:user._id , emailId:emailId, role:user.role},process.env.JWT_KEY,{expiresIn: 60*60});
@@ -94,5 +95,24 @@ const adminRegister = async(req,res)=>{
     }
 }
 
+const deleteProfile = async(req,res)=>{
+  
+    try{
+       const userId = req.result._id;
+      
+   
+    await User.findByIdAndDelete(userId);
 
-module.exports = {register, login,logout,adminRegister};
+
+    
+    res.status(200).send("Deleted Successfully");
+
+    }
+    catch(err){
+      
+        res.status(500).send("Internal Server Error");
+    }
+}
+
+
+module.exports = {register, login,logout,adminRegister,deleteProfile};

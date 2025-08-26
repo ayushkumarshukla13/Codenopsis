@@ -5,21 +5,21 @@ const submissionSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'user',
-    required: true
+    required: true,
   },
   problemId: {
     type: Schema.Types.ObjectId,
     ref: 'problem',
-    required: true
+    required: true,
   },
   code: {
     type: String,
-    required: true
+    required: true,
   },
   language: {
     type: String,
     required: true,
-    enum: ['javascript', 'c++', 'java'] 
+    enum: ['javascript', 'c++', 'java'],
   },
   status: {
     type: String,
@@ -49,6 +49,9 @@ const submissionSchema = new Schema({
 }, { 
   timestamps: true
 });
+
+
+submissionSchema.index({userId:1 , problemId:1});
 
 
 const Submission = mongoose.model('submission',submissionSchema);
