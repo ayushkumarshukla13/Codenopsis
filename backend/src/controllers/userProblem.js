@@ -16,11 +16,11 @@ const createProblem = async (req,res)=>{
       for(const {language,completeCode} of referenceSolution){
          
 
-       
+     
 
         const languageId = getLanguageById(language);
           
-        
+      
         const submissions = visibleTestCases.map((testcase)=>({
             source_code:completeCode,
             language_id: languageId,
@@ -30,11 +30,11 @@ const createProblem = async (req,res)=>{
 
 
         const submitResult = await submitBatch(submissions);
-      
+     
 
         const resultToken = submitResult.map((value)=> value.token);
 
-        
+       
         
        const testResult = await submitToken(resultToken);
 
@@ -50,7 +50,7 @@ const createProblem = async (req,res)=>{
       }
 
 
-     
+      
 
     const userProblem =  await Problem.create({
         ...req.body,
@@ -87,7 +87,7 @@ const updateProblem = async (req,res)=>{
     for(const {language,completeCode} of referenceSolution){
          
 
-      
+    
 
       const languageId = getLanguageById(language);
         
@@ -101,14 +101,14 @@ const updateProblem = async (req,res)=>{
 
 
       const submitResult = await submitBatch(submissions);
-      
-
+     
       const resultToken = submitResult.map((value)=> value.token);
 
       
       
      const testResult = await submitToken(resultToken);
 
+   
 
      for(const test of testResult){
       if(test.status_id!=3){
@@ -231,6 +231,6 @@ const submittedProblem = async(req,res)=>{
 
 
 
-module.exports = {createProblem,updateProblem,deleteProblem,getProblemById,getAllProblem,solvedAllProblembyUser};
+module.exports = {createProblem,updateProblem,deleteProblem,getProblemById,getAllProblem,solvedAllProblembyUser,submittedProblem};
 
 

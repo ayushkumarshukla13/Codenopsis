@@ -9,7 +9,7 @@ const Submission = require("../models/submission")
 const register = async (req,res)=>{
     
     try{
-     
+        
       validate(req.body); 
       const {firstName, emailId, password}  = req.body;
 
@@ -19,8 +19,16 @@ const register = async (req,res)=>{
     
      const user =  await User.create(req.body);
      const token =  jwt.sign({_id:user._id , emailId:emailId, role:'user'},process.env.JWT_KEY,{expiresIn: 60*60});
+     const reply = {
+        firstName: user.firstName,
+        emailId: user.emailId,
+        _id: user._id
+    }
      res.cookie('token',token,{maxAge: 60*60*1000});
-     res.status(201).send("User Registered Successfully");
+     res.status(201).json({
+        user:reply,
+        message:"Loggin Successfully"
+    })
     }
     catch(err){
         res.status(400).send("Error: "+err);
@@ -45,14 +53,24 @@ const login = async (req,res)=>{
         if(!match)
             throw new Error("Invalid Credentials");
 
+        const reply = {
+            firstName: user.firstName,
+            emailId: user.emailId,
+            _id: user._id
+        }
+
         const token =  jwt.sign({_id:user._id , emailId:emailId, role:user.role},process.env.JWT_KEY,{expiresIn: 60*60});
         res.cookie('token',token,{maxAge: 60*60*1000});
-        res.status(200).send("Logged In Succeessfully");
+        res.status(201).json({
+            user:reply,
+            message:"Loggin Successfully"
+        })
     }
     catch(err){
         res.status(401).send("Error: "+err);
     }
 }
+
 
 
 
@@ -64,8 +82,7 @@ const logout = async(req,res)=>{
 
         await redisClient.set(`token:${token}`,'Blocked');
         await redisClient.expireAt(`token:${token}`,payload.exp);
-    
-
+   
     res.cookie("token",null,{expires: new Date(Date.now())});
     res.send("Logged Out Succesfully");
 
@@ -78,7 +95,7 @@ const logout = async(req,res)=>{
 
 const adminRegister = async(req,res)=>{
     try{
-       
+          
       validate(req.body); 
       const {firstName, emailId, password}  = req.body;
 
@@ -103,7 +120,7 @@ const deleteProfile = async(req,res)=>{
    
     await User.findByIdAndDelete(userId);
 
-
+    
     
     res.status(200).send("Deleted Successfully");
 
