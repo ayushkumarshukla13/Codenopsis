@@ -9,7 +9,7 @@ const Submission = require("../models/submission")
 const register = async (req,res)=>{
     
     try{
-
+        
 
       validate(req.body); 
       const {firstName, emailId, password}  = req.body;
@@ -51,7 +51,7 @@ const login = async (req,res)=>{
 
         const user = await User.findOne({emailId});
 
-        const match = bcrypt.compare(password,user.password);
+        const match = await bcrypt.compare(password,user.password);
 
         if(!match)
             throw new Error("Invalid Credentials");

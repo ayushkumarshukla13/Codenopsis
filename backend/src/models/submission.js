@@ -27,11 +27,11 @@ const submissionSchema = new Schema({
     default: 'pending'
   },
   runtime: {
-    type: Number,  
+    type: Number,  // milliseconds
     default: 0
   },
   memory: {
-    type: Number,  
+    type: Number,  // kB
     default: 0
   },
   errorMessage: {

@@ -5,7 +5,7 @@ const {getLanguageById,submitBatch,submitToken} = require("../utils/problemUtili
 
 const submitCode = async (req,res)=>{
    
-    
+    // 
     try{
       
        const userId = req.result._id;
@@ -22,8 +22,10 @@ const submitCode = async (req,res)=>{
       
       console.log(language);
       
-    
+    //    Fetch the problem from database
        const problem =  await Problem.findById(problemId);
+    //    testcases(Hidden)
+    
     
     const submittedResult = await Submission.create({
           userId,
@@ -53,7 +55,7 @@ const submitCode = async (req,res)=>{
     const testResult = await submitToken(resultToken);
     
 
-    
+    // submittedResult ko update karo
     let testCasesPassed = 0;
     let runtime = 0;
     let memory = 0;
@@ -79,7 +81,7 @@ const submitCode = async (req,res)=>{
     }
 
 
-    
+    // Store the result in Database in Submission
     submittedResult.status   = status;
     submittedResult.testCasesPassed = testCasesPassed;
     submittedResult.errorMessage = errorMessage;
@@ -88,7 +90,9 @@ const submitCode = async (req,res)=>{
 
     await submittedResult.save();
     
-
+    // ProblemId ko insert karenge userSchema ke problemSolved mein if it is not persent there.
+    
+    // req.result == user Information
 
     if(!req.result.problemSolved.includes(problemId)){
       req.result.problemSolved.push(problemId);
@@ -125,11 +129,11 @@ const runCode = async(req,res)=>{
 
    
       const problem =  await Problem.findById(problemId);
-
+  
       if(language==='cpp')
         language='c++'
 
-  
+   //    Judge0 code ko submit karna hai
 
    const languageId = getLanguageById(language);
 
