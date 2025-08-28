@@ -4,6 +4,7 @@ const User = require("../models/user");
 const Submission = require("../models/submission");
 
 const createProblem = async (req,res)=>{
+   
 
     const {title,description,difficulty,tags,
         visibleTestCases,hiddenTestCases,startCode,
@@ -16,11 +17,11 @@ const createProblem = async (req,res)=>{
       for(const {language,completeCode} of referenceSolution){
          
 
-     
+       
 
         const languageId = getLanguageById(language);
           
-      
+   
         const submissions = visibleTestCases.map((testcase)=>({
             source_code:completeCode,
             language_id: languageId,
@@ -30,7 +31,7 @@ const createProblem = async (req,res)=>{
 
 
         const submitResult = await submitBatch(submissions);
-     
+  
 
         const resultToken = submitResult.map((value)=> value.token);
 
@@ -87,11 +88,11 @@ const updateProblem = async (req,res)=>{
     for(const {language,completeCode} of referenceSolution){
          
 
-    
+      
 
       const languageId = getLanguageById(language);
         
-      
+     
       const submissions = visibleTestCases.map((testcase)=>({
           source_code:completeCode,
           language_id: languageId,
@@ -101,7 +102,8 @@ const updateProblem = async (req,res)=>{
 
 
       const submitResult = await submitBatch(submissions);
-     
+      
+
       const resultToken = submitResult.map((value)=> value.token);
 
       
@@ -216,7 +218,7 @@ const submittedProblem = async(req,res)=>{
     const userId = req.result._id;
     const problemId = req.params.pid;
 
-  const ans = await Submission.find({userId,problemId});
+   const ans = await Submission.find({userId,problemId});
   
   if(ans.length==0)
     res.status(200).send("No Submission is persent");

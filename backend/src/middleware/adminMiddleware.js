@@ -5,7 +5,7 @@ const redisClient = require("../config/redis")
 const adminMiddleware = async (req,res,next)=>{
 
     try{
-
+       
         const {token} = req.cookies;
         if(!token)
             throw new Error("Token is not persent");
@@ -27,7 +27,7 @@ const adminMiddleware = async (req,res,next)=>{
             throw new Error("User Doesn't Exist");
         }
 
-       
+        
 
         const IsBlocked = await redisClient.exists(`token:${token}`);
 

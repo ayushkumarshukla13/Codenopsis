@@ -5,6 +5,7 @@ const {register, login,logout, adminRegister,deleteProfile} = require('../contro
 const userMiddleware = require("../middleware/userMiddleware");
 const adminMiddleware = require('../middleware/adminMiddleware');
 
+
 authRouter.post('/register', register);
 authRouter.post('/login', login);
 authRouter.post('/logout', userMiddleware, logout);
@@ -15,7 +16,8 @@ authRouter.get('/check',userMiddleware,(req,res)=>{
     const reply = {
         firstName: req.result.firstName,
         emailId: req.result.emailId,
-        _id:req.result._id
+        _id:req.result._id,
+        role:req.result.role,
     }
 
     res.status(200).json({

@@ -33,6 +33,9 @@ export const checkAuth = createAsyncThunk(
       const { data } = await axiosClient.get('/user/check');
       return data.user;
     } catch (error) {
+      if (error.response?.status === 401) {
+        return rejectWithValue(null); // Special case for no session
+      }
       return rejectWithValue(error);
     }
   }
@@ -42,7 +45,7 @@ export const logoutUser = createAsyncThunk(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
-      await axiosClient.post('/logout');
+      await axiosClient.post('/user/logout');
       return null;
     } catch (error) {
       return rejectWithValue(error);
@@ -62,7 +65,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-     
+      // Register User Cases
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -79,7 +82,7 @@ const authSlice = createSlice({
         state.user = null;
       })
   
-      
+      // Login User Cases
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -96,7 +99,7 @@ const authSlice = createSlice({
         state.user = null;
       })
   
-      
+      // Check Auth Cases
       .addCase(checkAuth.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -113,7 +116,7 @@ const authSlice = createSlice({
         state.user = null;
       })
   
-    
+      // Logout User Cases
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
         state.error = null;
