@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router'; // Fixed import
+import { NavLink } from 'react-router-dom'; // Fixed import
 import { useDispatch, useSelector } from 'react-redux';
 import axiosClient from '../utils/axiosClient';
 import { logoutUser } from '../authSlice';
@@ -19,6 +19,7 @@ function Homepage() {
     const fetchProblems = async () => {
       try {
         const { data } = await axiosClient.get('/problem/getAllProblem');
+        console.log('Fetched problems:', data);
         setProblems(data);
       } catch (error) {
         console.error('Error fetching problems:', error);
@@ -50,6 +51,10 @@ function Homepage() {
                       solvedProblems.some(sp => sp._id === problem._id);
     return difficultyMatch && tagMatch && statusMatch;
   });
+
+  console.log('All problems:', problems);
+  console.log('Filtered problems:', filteredProblems);
+  console.log('Current filters:', filters);
 
   return (
     <div className="min-h-screen bg-base-200">

@@ -30,10 +30,14 @@ app.use("/video",videoRouter);
 
 const InitalizeConnection = async ()=>{
     try{
-
-        await Promise.all([main(),redisClient.connect()]);
+        await main();
         console.log("DB Connected");
-        
+
+        // Attempt Redis connect without blocking server startup
+        redisClient.connect()
+            .then(() => console.log("Redis Connected"))
+            .catch((err) => console.log("Redis connection failed:", err?.message || err));
+
         app.listen(process.env.PORT, ()=>{
             console.log("Server listening at port number: "+ process.env.PORT);
         })

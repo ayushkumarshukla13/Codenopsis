@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import Editor from '@monaco-editor/react';
-import { useParams } from 'react-router';
+import { useParams } from 'react-router-dom';
 import axiosClient from "../utils/axiosClient"
 import SubmissionHistory from "../components/SubmissionHistory"
 import ChatAi from '../components/ChatAi';
 import Editorial from '../components/Editorial';
 
 const langMap = {
-        cpp: 'C++',
-        java: 'Java',
-        javascript: 'JavaScript'
+        'C++': 'C++',
+        'Java': 'Java',
+        'JavaScript': 'JavaScript'
 };
 
 
 const ProblemPage = () => {
   const [problem, setProblem] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('javascript');
+  const [selectedLanguage, setSelectedLanguage] = useState('JavaScript');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [runResult, setRunResult] = useState(null);
@@ -38,7 +38,8 @@ const ProblemPage = () => {
         const response = await axiosClient.get(`/problem/problemById/${problemId}`);
        
         
-        const initialCode = response.data.startCode.find(sc => sc.language === langMap[selectedLanguage]).initialCode;
+        const startCodeItem = response.data.startCode.find(sc => sc.language === langMap[selectedLanguage]);
+        const initialCode = startCodeItem ? startCodeItem.initialCode : '// Default code here';
 
         setProblem(response.data);
         
@@ -57,7 +58,8 @@ const ProblemPage = () => {
   // Update code when language changes
   useEffect(() => {
     if (problem) {
-      const initialCode = problem.startCode.find(sc => sc.language === langMap[selectedLanguage]).initialCode;
+      const startCodeItem = problem.startCode.find(sc => sc.language === langMap[selectedLanguage]);
+      const initialCode = startCodeItem ? startCodeItem.initialCode : '// Default code here';
       setCode(initialCode);
     }
   }, [selectedLanguage, problem]);
@@ -123,9 +125,9 @@ const ProblemPage = () => {
 
   const getLanguageForMonaco = (lang) => {
     switch (lang) {
-      case 'javascript': return 'javascript';
-      case 'java': return 'java';
-      case 'cpp': return 'cpp';
+      case 'JavaScript': return 'javascript';
+      case 'Java': return 'java';
+      case 'C++': return 'cpp';
       default: return 'javascript';
     }
   };
