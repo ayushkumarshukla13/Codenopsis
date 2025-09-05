@@ -2,21 +2,22 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import Editor from '@monaco-editor/react';
 import { useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import axiosClient from "../utils/axiosClient"
 import SubmissionHistory from "../components/SubmissionHistory"
 import ChatAi from '../components/ChatAi';
 import Editorial from '../components/Editorial';
 
 const langMap = {
-        'C++': 'C++',
-        'Java': 'Java',
-        'JavaScript': 'JavaScript'
+        'cpp': 'C++',
+        'java': 'Java',
+        'javascript': 'JavaScript'
 };
 
 
 const ProblemPage = () => {
   const [problem, setProblem] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState('JavaScript');
+  const [selectedLanguage, setSelectedLanguage] = useState('javascript');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [runResult, setRunResult] = useState(null);
@@ -25,21 +26,63 @@ const ProblemPage = () => {
   const [activeRightTab, setActiveRightTab] = useState('code');
   const editorRef = useRef(null);
   let {problemId}  = useParams();
+  
+  // Add authentication check
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  console.log('User authenticated:', isAuthenticated);
+  console.log('User:', user);
 
   
 
   const { handleSubmit } = useForm();
 
- useEffect(() => {
+   useEffect(() => {
     const fetchProblem = async () => {
       setLoading(true);
       try {
         
         const response = await axiosClient.get(`/problem/problemById/${problemId}`);
-       
+        console.log('=== PROBLEM FETCH DEBUG ===');
+        console.log('Problem ID:', problemId);
+        console.log('Full response:', response);
+        console.log('Problem data:', response.data);
+        console.log('Start code array:', response.data.startCode);
+        console.log('Start code length:', response.data.startCode?.length);
+        console.log('Selected language:', selectedLanguage);
+        console.log('Language map value:', langMap[selectedLanguage]);
         
-        const startCodeItem = response.data.startCode.find(sc => sc.language === langMap[selectedLanguage]);
-        const initialCode = startCodeItem ? startCodeItem.initialCode : '// Default code here';
+        // Log each start code item
+        if (response.data.startCode) {
+          response.data.startCode.forEach((sc, index) => {
+            console.log(`Start code ${index}:`, sc);
+            console.log(`Language: "${sc.language}", Length: ${sc.language?.length}`);
+          });
+        }
+        
+        const startCodeItem = response.data.startCode?.find(sc => sc.language === langMap[selectedLanguage]);
+        console.log('Found start code item:', startCodeItem);
+        
+        // Fallback: if no match found, try to find any code for the language
+        let initialCode = startCodeItem?.initialCode;
+        if (!initialCode) {
+          // Try different language formats as fallback
+          const fallbackItem = response.data.startCode?.find(sc => 
+            sc.language.toLowerCase() === selectedLanguage.toLowerCase() ||
+            sc.language === selectedLanguage ||
+            (selectedLanguage === 'cpp' && sc.language === 'C++') ||
+            (selectedLanguage === 'java' && sc.language === 'Java') ||
+            (selectedLanguage === 'javascript' && sc.language === 'JavaScript')
+          );
+          initialCode = fallbackItem?.initialCode;
+        }
+        
+        // Final fallback
+        if (!initialCode) {
+          initialCode = getDefaultCode(selectedLanguage);
+        }
+        
+        console.log('Final initial code:', initialCode);
+        console.log('=== END DEBUG ===');
 
         setProblem(response.data);
         
@@ -48,18 +91,43 @@ const ProblemPage = () => {
         
       } catch (error) {
         console.error('Error fetching problem:', error);
+        console.error('Error response:', error.response);
+        console.error('Error status:', error.response?.status);
+        console.error('Error data:', error.response?.data);
         setLoading(false);
       }
     };
 
     fetchProblem();
-  }, [problemId]);
+  }, [problemId, selectedLanguage]);
 
   // Update code when language changes
   useEffect(() => {
     if (problem) {
-      const startCodeItem = problem.startCode.find(sc => sc.language === langMap[selectedLanguage]);
-      const initialCode = startCodeItem ? startCodeItem.initialCode : '// Default code here';
+      console.log('Language changed to:', selectedLanguage);
+      console.log('Looking for language:', langMap[selectedLanguage]);
+      
+      const startCodeItem = problem.startCode?.find(sc => sc.language === langMap[selectedLanguage]);
+      console.log('Found start code item for language change:', startCodeItem);
+      
+      // Fallback logic for language change
+      let initialCode = startCodeItem?.initialCode;
+      if (!initialCode) {
+        const fallbackItem = problem.startCode?.find(sc => 
+          sc.language.toLowerCase() === selectedLanguage.toLowerCase() ||
+          sc.language === selectedLanguage ||
+          (selectedLanguage === 'cpp' && sc.language === 'C++') ||
+          (selectedLanguage === 'java' && sc.language === 'Java') ||
+          (selectedLanguage === 'javascript' && sc.language === 'JavaScript')
+        );
+        initialCode = fallbackItem?.initialCode;
+      }
+      
+      if (!initialCode) {
+        initialCode = getDefaultCode(selectedLanguage);
+      }
+      
+      console.log('Setting code to:', initialCode);
       setCode(initialCode);
     }
   }, [selectedLanguage, problem]);
@@ -81,9 +149,12 @@ const ProblemPage = () => {
     setRunResult(null);
     
     try {
+      // Convert frontend language format to backend format
+      const backendLanguage = selectedLanguage === 'cpp' ? 'c++' : selectedLanguage;
+      
       const response = await axiosClient.post(`/submission/run/${problemId}`, {
         code,
-        language: selectedLanguage
+        language: backendLanguage
       });
 
       setRunResult(response.data);
@@ -106,9 +177,12 @@ const ProblemPage = () => {
     setSubmitResult(null);
     
     try {
+        // Convert frontend language format to backend format
+        const backendLanguage = selectedLanguage === 'cpp' ? 'c++' : selectedLanguage;
+        
         const response = await axiosClient.post(`/submission/submit/${problemId}`, {
         code:code,
-        language: selectedLanguage
+        language: backendLanguage
       });
 
        setSubmitResult(response.data);
@@ -125,10 +199,23 @@ const ProblemPage = () => {
 
   const getLanguageForMonaco = (lang) => {
     switch (lang) {
-      case 'JavaScript': return 'javascript';
-      case 'Java': return 'java';
-      case 'C++': return 'cpp';
+      case 'javascript': return 'javascript';
+      case 'java': return 'java';
+      case 'cpp': return 'cpp';
       default: return 'javascript';
+    }
+  };
+
+  const getDefaultCode = (lang) => {
+    switch (lang) {
+      case 'javascript':
+        return '// Write your JavaScript solution here\nfunction solve() {\n    // Your code here\n}\n';
+      case 'java':
+        return '// Write your Java solution here\npublic class Solution {\n    public void solve() {\n        // Your code here\n    }\n}';
+      case 'cpp':
+        return '// Write your C++ solution here\n#include <iostream>\nusing namespace std;\n\nvoid solve() {\n    // Your code here\n}\n';
+      default:
+        return '// Write your solution here\n';
     }
   };
 
