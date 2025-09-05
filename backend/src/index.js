@@ -14,7 +14,7 @@ const cors = require('cors')
 // console.log("Hello")
 
 app.use(cors({
-    origin: ['http://localhost:5173','https://codenopsis-3mph.vercel.app/'],
+    origin: ['http://localhost:5173','https://codenopsis-3mph.vercel.app'],
     credentials: true 
 }))
 
