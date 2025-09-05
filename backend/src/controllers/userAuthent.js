@@ -67,7 +67,13 @@ const login = async (req, res) => {
       process.env.JWT_KEY,
       { expiresIn: 60 * 60 }
     );
-    res.cookie("token", token, { maxAge: 60 * 60 * 1000 });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,        // ✅ required for Render (HTTPS)
+      sameSite: "none",    // ✅ allows frontend <-> backend cookie sharing
+      maxAge: 60 * 60 * 1000,
+    });
+
     res.status(201).json({
       user: reply,
       message: "Loggin Successfully",
@@ -105,7 +111,13 @@ const adminRegister = async (req, res) => {
       process.env.JWT_KEY,
       { expiresIn: 60 * 60 }
     );
-    res.cookie("token", token, { maxAge: 60 * 60 * 1000 });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,        // ✅ required for Render (HTTPS)
+      sameSite: "none",    // ✅ allows frontend <-> backend cookie sharing
+      maxAge: 60 * 60 * 1000,
+    });
+
     res.status(201).send("User Registered Successfully");
   } catch (err) {
     res.status(400).send("Error: " + err);
