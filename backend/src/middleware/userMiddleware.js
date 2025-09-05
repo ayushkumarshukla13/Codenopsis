@@ -5,7 +5,7 @@ const redisClient = require("../config/redis")
 const userMiddleware = async (req,res,next)=>{
 
     try{
-        
+        console.log(req.cookies)
         const {token} = req.cookies;
         if(!token)
             throw new Error("Token is not persent");
